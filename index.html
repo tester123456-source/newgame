@@ -3,91 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>총게임</title>
+    <title>2D 총게임</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #f0f0f0;
             text-align: center;
-            padding: 50px;
         }
-        .button {
-            margin: 10px;
-            padding: 15px 30px;
-            font-size: 16px;
-            cursor: pointer;
+        canvas {
+            border: 1px solid #000;
+            background: #fff;
+            display: block;
+            margin: 0 auto;
         }
         #result {
             margin-top: 20px;
             font-size: 24px;
         }
         #hp {
-            margin-top: 20px;
             font-size: 20px;
         }
     </style>
 </head>
 <body>
 
-<h1>총게임</h1>
-<button class="button" id="shoot">사격</button>
-<button class="button" id="restart" style="display: none;">다시하기</button>
-
+<h1>2D 총게임</h1>
+<canvas id="gameCanvas" width="600" height="400"></canvas>
+<div id="hp">플레이어 HP: 3</div>
 <div id="result"></div>
-<div id="hp">플레이어 HP: 3 | 적 HP: 3</div>
 
 <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
     let playerHP = 3;
     let enemyHP = 3;
-    const resultDisplay = document.getElementById('result');
-    const hpDisplay = document.getElementById('hp');
+    let enemyPosition = { x: Math.random() * (canvas.width - 50), y: 50 };
+    const enemySize = 50;
+    let gameActive = true;
 
-    function updateHP() {
-        hpDisplay.innerHTML = `플레이어 HP: ${playerHP} | 적 HP: ${enemyHP}`;
-        if (playerHP <= 0) {
-            resultDisplay.innerHTML = "게임 오버! 적이 이겼습니다!";
-            disableButtons();
-        } else if (enemyHP <= 0) {
-            resultDisplay.innerHTML = "축하합니다! 당신이 이겼습니다!";
-            disableButtons();
+    function drawPlayer() {
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(canvas.width / 2 - 25, canvas.height - 30, 50, 20); // 플레이어
+    }
+
+    function drawEnemy() {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(enemyPosition.x, enemyPosition.y, enemySize, enemySize); // 적
+    }
+
+    function drawHP() {
+        document.getElementById('hp').innerText = `플레이어 HP: ${playerHP}`;
+    }
+
+    function updateGame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawPlayer();
+        drawEnemy();
+        drawHP();
+
+        if (enemyHP <= 0) {
+            document.getElementById('result').innerText = "축하합니다! 적을 처치했습니다!";
+            gameActive = false;
+        } else if (playerHP <= 0) {
+            document.getElementById('result').innerText = "게임 오버! 적이 이겼습니다!";
+            gameActive = false;
         }
     }
 
-    function disableButtons() {
-        document.getElementById('shoot').disabled = true;
-        document.getElementById('restart').style.display = 'block';
-    }
-
-    function resetGame() {
-        playerHP = 3;
-        enemyHP = 3;
-        resultDisplay.innerHTML = '';
-        hpDisplay.innerHTML = `플레이어 HP: ${playerHP} | 적 HP: ${enemyHP}`;
-        document.getElementById('restart').style.display = 'none'; // 다시하기 버튼 숨기기
-        document.getElementById('shoot').disabled = false; // 버튼 활성화
-    }
-
     function shoot() {
+        if (!gameActive) return;
+
         const hitChance = Math.random();
         if (hitChance < 0.7) { // 70% 확률로 적에게 대미지를 줌
             const damage = Math.floor(Math.random() * 2) + 1; // 1 또는 2의 피해량
             enemyHP -= damage;
-            resultDisplay.innerHTML = `당신이 적에게 ${damage}의 피해를 줬습니다!`;
+            document.getElementById('result').innerText = `당신이 적에게 ${damage}의 피해를 줬습니다!`;
         } else {
-            resultDisplay.innerHTML = "타격 실패! 적을 놓쳤습니다.";
+            document.getElementById('result').innerText = "타격 실패! 적을 놓쳤습니다.";
         }
 
+        // 적이 반격
         if (enemyHP > 0) {
             const enemyDamage = Math.floor(Math.random() * 2) + 1; // 적의 피해량
             playerHP -= enemyDamage;
-            resultDisplay.innerHTML += `<br>적이 반격하여 ${enemyDamage}의 피해를 줬습니다!`;
+            document.getElementById('result').innerText += `<br>적이 반격하여 ${enemyDamage}의 피해를 줬습니다!`;
         }
 
-        updateHP();
+        updateGame();
     }
 
-    document.getElementById('shoot').addEventListener('click', shoot);
-    document.getElementById('restart').addEventListener('click', resetGame);
+    document.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') {
+            shoot();
+        }
+    });
+
+    updateGame(); // 초기 게임 상태 설정
 </script>
 
 </body>
