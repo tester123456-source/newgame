@@ -33,6 +33,7 @@
 <button class="button" id="rock">바위</button>
 <button class="button" id="scissors">가위</button>
 <button class="button" id="paper">보</button>
+<button class="button" id="restart" style="display: none;">다시하기</button>
 
 <div id="result"></div>
 <div id="hp">플레이어 HP: 3 | 컴퓨터 HP: 3</div>
@@ -72,6 +73,9 @@
 
         updateHP();
         resultDisplay.innerHTML = `당신의 선택: ${playerChoice} <br> 컴퓨터의 선택: ${computerChoice} <br>${result}`;
+        
+        // 음악 재생
+        bgMusic.play();
     }
 
     function updateHP() {
@@ -89,18 +93,27 @@
         document.getElementById('rock').disabled = true;
         document.getElementById('scissors').disabled = true;
         document.getElementById('paper').disabled = true;
+        document.getElementById('restart').style.display = 'block'; // 다시하기 버튼 표시
     }
 
-    // 게임 시작 시 배경 음악 재생
-    window.onload = function() {
-        bgMusic.play();
-    };
+    function resetGame() {
+        playerHP = 3;
+        computerHP = 3;
+        resultDisplay.innerHTML = '';
+        hpDisplay.innerHTML = `플레이어 HP: ${playerHP} | 컴퓨터 HP: ${computerHP}`;
+        document.getElementById('rock').disabled = false;
+        document.getElementById('scissors').disabled = false;
+        document.getElementById('paper').disabled = false;
+        document.getElementById('restart').style.display = 'none'; // 다시하기 버튼 숨기기
+        bgMusic.currentTime = 0; // 음악을 처음으로 돌립니다.
+        bgMusic.play(); // 음악 재생
+    }
 
     document.getElementById('rock').addEventListener('click', () => playGame('바위'));
     document.getElementById('scissors').addEventListener('click', () => playGame('가위'));
     document.getElementById('paper').addEventListener('click', () => playGame('보'));
+    document.getElementById('restart').addEventListener('click', resetGame);
 </script>
 
 </body>
 </html>
-
