@@ -37,12 +37,15 @@
 <div id="result"></div>
 <div id="hp">플레이어 HP: 3 | 컴퓨터 HP: 3</div>
 
+<audio id="bg-music" src="background.mp3" loop></audio>
+
 <script>
     const choices = ['바위', '가위', '보'];
     let playerHP = 3;
     let computerHP = 3;
     const resultDisplay = document.getElementById('result');
     const hpDisplay = document.getElementById('hp');
+    const bgMusic = document.getElementById('bg-music');
 
     function getComputerChoice() {
         const randomIndex = Math.floor(Math.random() * choices.length);
@@ -88,6 +91,11 @@
         document.getElementById('paper').disabled = true;
     }
 
+    // 게임 시작 시 배경 음악 재생
+    window.onload = function() {
+        bgMusic.play();
+    };
+
     document.getElementById('rock').addEventListener('click', () => playGame('바위'));
     document.getElementById('scissors').addEventListener('click', () => playGame('가위'));
     document.getElementById('paper').addEventListener('click', () => playGame('보'));
@@ -95,3 +103,4 @@
 
 </body>
 </html>
+
