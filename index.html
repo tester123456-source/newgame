@@ -9,6 +9,7 @@
             font-family: Arial, sans-serif;
             background: #f0f0f0;
             text-align: center;
+            overflow: hidden;
         }
         canvas {
             border: 1px solid #000;
@@ -16,19 +17,19 @@
             display: block;
             margin: 0 auto;
         }
+        #hp {
+            font-size: 20px;
+        }
         #result {
             margin-top: 20px;
             font-size: 24px;
-        }
-        #hp {
-            font-size: 20px;
         }
     </style>
 </head>
 <body>
 
 <h1>2D 총게임</h1>
-<canvas id="gameCanvas" width="600" height="400"></canvas>
+<canvas id="gameCanvas" width="800" height="600"></canvas>
 <div id="hp">플레이어 HP: 3</div>
 <div id="result"></div>
 
@@ -38,13 +39,14 @@
 
     let playerHP = 3;
     let enemyHP = 3;
-    let enemyPosition = { x: Math.random() * (canvas.width - 50), y: 50 };
+    let playerPosition = { x: canvas.width / 2, y: canvas.height - 50 };
+    const enemyPosition = { x: Math.random() * (canvas.width - 50), y: 50 };
     const enemySize = 50;
     let gameActive = true;
 
     function drawPlayer() {
         ctx.fillStyle = 'blue';
-        ctx.fillRect(canvas.width / 2 - 25, canvas.height - 30, 50, 20); // 플레이어
+        ctx.fillRect(playerPosition.x - 25, playerPosition.y - 10, 50, 20); // 플레이어
     }
 
     function drawEnemy() {
@@ -94,10 +96,14 @@
     }
 
     document.addEventListener('keydown', (event) => {
-        if (event.code === 'Space') {
-            shoot();
+        if (event.key === 'ArrowLeft' && playerPosition.x > 25) {
+            playerPosition.x -= 10; // 왼쪽 이동
+        } else if (event.key === 'ArrowRight' && playerPosition.x < canvas.width - 25) {
+            playerPosition.x += 10; // 오른쪽 이동
         }
     });
+
+    canvas.addEventListener('click', shoot);
 
     updateGame(); // 초기 게임 상태 설정
 </script>
