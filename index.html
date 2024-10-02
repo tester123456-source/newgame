@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>가위 바위 보 게임</title>
+    <title>리듬 턴제 격투기 게임</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,57 +25,43 @@
             margin-top: 20px;
             font-size: 20px;
         }
+        #note {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-<h1>가위 바위 보 게임</h1>
-<button class="button" id="rock">바위</button>
-<button class="button" id="scissors">가위</button>
-<button class="button" id="paper">보</button>
+<h1>리듬 턴제 격투기 게임</h1>
 <button class="button" id="restart" style="display: none;">다시하기</button>
 
 <div id="result"></div>
 <div id="hp">플레이어 HP: 3 | 컴퓨터 HP: 3</div>
+<div id="note"></div>
 
 <audio id="bg-music" src="background.mp3" loop></audio>
 
 <script>
-    const choices = ['바위', '가위', '보'];
     let playerHP = 3;
     let computerHP = 3;
     const resultDisplay = document.getElementById('result');
     const hpDisplay = document.getElementById('hp');
     const bgMusic = document.getElementById('bg-music');
+    let noteSpeed = 2000; // 노트가 내려오는 시간 (밀리초)
+    let noteTimeout;
+    let noteActive = false;
 
-    function getComputerChoice() {
-        const randomIndex = Math.floor(Math.random() * choices.length);
-        return choices[randomIndex];
-    }
-
-    function playGame(playerChoice) {
-        const computerChoice = getComputerChoice();
-        let result;
-
-        if (playerChoice === computerChoice) {
-            result = '비겼습니다!';
-        } else if (
-            (playerChoice === '바위' && computerChoice === '가위') ||
-            (playerChoice === '가위' && computerChoice === '보') ||
-            (playerChoice === '보' && computerChoice === '바위')
-        ) {
-            computerHP--;
-            result = '당신이 이겼습니다!';
-        } else {
-            playerHP--;
-            result = '컴퓨터가 이겼습니다!';
-        }
-
-        updateHP();
-        resultDisplay.innerHTML = `당신의 선택: ${playerChoice} <br> 컴퓨터의 선택: ${computerChoice} <br>${result}`;
-        
-        // 음악 재생
-        bgMusic.play();
+    function computerAttack() {
+        const damage = Math.floor(Math.random() * 2) + 1; // 1 또는 2의 피해량
+        playerHP -= damage;
+        resultDisplay.innerHTML += `<br>컴퓨터가 공격하여 ${damage}의 피해를 줬습니다!`;
     }
 
     function updateHP() {
@@ -90,9 +76,8 @@
     }
 
     function disableButtons() {
-        document.getElementById('rock').disabled = true;
-        document.getElementById('scissors').disabled = true;
-        document.getElementById('paper').disabled = true;
+        clearTimeout(noteTimeout);
+        noteActive = false;
         document.getElementById('restart').style.display = 'block'; // 다시하기 버튼 표시
     }
 
@@ -101,18 +86,64 @@
         computerHP = 3;
         resultDisplay.innerHTML = '';
         hpDisplay.innerHTML = `플레이어 HP: ${playerHP} | 컴퓨터 HP: ${computerHP}`;
-        document.getElementById('rock').disabled = false;
-        document.getElementById('scissors').disabled = false;
-        document.getElementById('paper').disabled = false;
         document.getElementById('restart').style.display = 'none'; // 다시하기 버튼 숨기기
         bgMusic.currentTime = 0; // 음악을 처음으로 돌립니다.
         bgMusic.play(); // 음악 재생
+        startGame();
     }
 
-    document.getElementById('rock').addEventListener('click', () => playGame('바위'));
-    document.getElementById('scissors').addEventListener('click', () => playGame('가위'));
-    document.getElementById('paper').addEventListener('click', () => playGame('보'));
+    function startGame() {
+        noteActive = true;
+        document.getElementById('note').style.display = 'block';
+        document.getElementById('note').style.top = '-50px';
+        dropNote();
+    }
+
+    function dropNote() {
+        const note = document.getElementById('note');
+        const noteHeight = window.innerHeight;
+        note.style.display = 'block';
+        let position = -50; // 노트 시작 위치
+
+        const interval = setInterval(() => {
+            if (position >= noteHeight) {
+                clearInterval(interval);
+                note.style.display = 'none';
+                noteActive = false;
+                computerAttack(); // 플레이어가 실패했을 때 컴퓨터 공격
+                updateHP();
+                startGame(); // 다음 노트 시작
+            } else {
+                position += 5; // 노트가 내려가는 속도
+                note.style.top = position + 'px';
+            }
+        }, 20);
+    }
+
+    function hitNote() {
+        if (noteActive) {
+            const damage = Math.floor(Math.random() * 2) + 1; // 1 또는 2의 피해량
+            computerHP -= damage;
+            resultDisplay.innerHTML = `당신이 공격하여 ${damage}의 피해를 줬습니다!`;
+            updateHP();
+            document.getElementById('note').style.display = 'none';
+            noteActive = false;
+            startGame(); // 다음 노트 시작
+        }
+    }
+
     document.getElementById('restart').addEventListener('click', resetGame);
+    document.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') {
+            hitNote();
+        }
+    });
+
+    // 게임 시작 시 배경 음악 재생
+    window.onload = function() {
+        bgMusic.play();
+        resetGame(); // 게임을 초기화하고 시작
+    };
 </script>
 
 </body>
