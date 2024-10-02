@@ -26,14 +26,24 @@
             background: red;
             border: 1px solid black;
         }
+        .timing-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: green;
+            top: 550px;
+            left: 0;
+        }
     </style>
 </head>
 <body>
 
-<div id="game-container"></div>
+<div id="game-container">
+    <div class="timing-line"></div>
+</div>
 <audio id="hit-sound" src="hit.mp3"></audio>
 <audio id="miss-sound" src="miss.mp3"></audio>
-<audio id="bg-music" src="background.mp3" loop autoplay></audio>
+<audio id="bg-music" src="background.mp3"></audio>
 
 <script>
     const notes = ['A', 'S', 'K', 'L'];
@@ -59,6 +69,7 @@
     }
 
     function startGame() {
+        document.getElementById('bg-music').play();
         noteInterval = setInterval(spawnNote, 1000);
     }
 
