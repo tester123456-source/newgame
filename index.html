@@ -76,7 +76,6 @@
     }
 
     function disableButtons() {
-        clearTimeout(noteTimeout);
         noteActive = false;
         document.getElementById('restart').style.display = 'block'; // 다시하기 버튼 표시
     }
@@ -93,9 +92,7 @@
     }
 
     function startTurn() {
-        // 노트를 시작하고 플레이어의 공격을 받을 준비를 합니다.
-        noteActive = true;
-        dropNote();
+        noteActive = false; // 턴 시작 시 노트 비활성화
     }
 
     function dropNote() {
@@ -120,7 +117,10 @@
     }
 
     function hitNote() {
-        if (noteActive) {
+        if (!noteActive) {
+            noteActive = true;
+            dropNote(); // 노트 떨어뜨리기
+        } else {
             const damage = Math.floor(Math.random() * 2) + 1; // 1 또는 2의 피해량
             computerHP -= damage;
             resultDisplay.innerHTML = `당신이 공격하여 ${damage}의 피해를 줬습니다!`;
@@ -136,8 +136,7 @@
             resultDisplay.innerHTML = "당신이 방어했습니다!";
             document.getElementById('note').style.display = 'none';
             noteActive = false;
-            computerAttack(); // 컴퓨터의 공격
-            updateHP();
+            // 가드 시 컴퓨터 공격 없음
             startTurn(); // 다음 턴 시작
         } else {
             computerAttack(); // 노트가 없을 때 컴퓨터 공격
@@ -154,6 +153,7 @@
     window.onload = function() {
         bgMusic.play();
         resetGame(); // 게임을 초기화하고 시작
+        startTurn(); // 턴 시작
     };
 </script>
 
