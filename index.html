@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리듬 게임</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #222;
+            color: white;
+            text-align: center;
+        }
+        #game-container {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 2px solid white;
+        }
+        .note {
+            position: absolute;
+            width: 80px;
+            height: 20px;
+            background: red;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container"></div>
+<audio id="hit-sound" src="hit.mp3"></audio>
+<audio id="miss-sound" src="miss.mp3"></audio>
+<audio id="bg-music" src="background.mp3" loop autoplay></audio>
+
+<script>
+    const notes = ['A', 'S', 'K', 'L'];
+    const gameContainer = document.getElementById('game-container');
+    let noteInterval;
+
+    function spawnNote() {
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.style.left = `${Math.floor(Math.random() * 4) * 100}px`;
+        note.style.top = '0px';
+        gameContainer.appendChild(note);
+
+        const fallInterval = setInterval(() => {
+            note.style.top = `${parseInt(note.style.top) + 5}px`;
+
+            if (parseInt(note.style.top) > 580) {
+                clearInterval(fallInterval);
+                gameContainer.removeChild(note);
+                document.getElementById('miss-sound').play();
+            }
+        }, 100);
+    }
+
+    function startGame() {
+        noteInterval = setInterval(spawnNote, 1000);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const key = e.key.toUpperCase();
+        const noteIndex = notes.indexOf(key);
+
+        if (noteIndex !== -1) {
+            const notesInContainer = document.querySelectorAll('.note');
+            const note = Array.from(notesInContainer).find((n) => {
+                const left = parseInt(n.style.left);
+                const top = parseInt(n.style.top);
+                return left === noteIndex * 100 && top > 550 && top < 580;
+            });
+
+            if (note) {
+                gameContainer.removeChild(note);
+                document.getElementById('hit-sound').play();
+            }
+        }
+    });
+
+    startGame();
+</script>
+
+</body>
+</html>
