@@ -40,6 +40,8 @@
 <body>
 
 <h1>리듬 턴제 격투기 게임</h1>
+<button class="button" id="punch">펀치</button>
+<button class="button" id="guard">가드</button>
 <button class="button" id="restart" style="display: none;">다시하기</button>
 
 <div id="result"></div>
@@ -54,8 +56,6 @@
     const resultDisplay = document.getElementById('result');
     const hpDisplay = document.getElementById('hp');
     const bgMusic = document.getElementById('bg-music');
-    let noteSpeed = 2000; // 노트가 내려오는 시간 (밀리초)
-    let noteTimeout;
     let noteActive = false;
 
     function computerAttack() {
@@ -89,30 +89,31 @@
         document.getElementById('restart').style.display = 'none'; // 다시하기 버튼 숨기기
         bgMusic.currentTime = 0; // 음악을 처음으로 돌립니다.
         bgMusic.play(); // 음악 재생
-        startGame();
+        startTurn();
     }
 
-    function startGame() {
-        noteActive = true;
-        document.getElementById('note').style.display = 'block';
-        document.getElementById('note').style.top = '-50px';
-        dropNote();
+    function startTurn() {
+        // 노트를 시작하고 플레이어의 공격을 받을 준비를 합니다.
+        if (!noteActive) {
+            noteActive = true;
+            dropNote();
+        }
     }
 
     function dropNote() {
         const note = document.getElementById('note');
-        const noteHeight = window.innerHeight;
         note.style.display = 'block';
+        note.style.top = '-50px';
         let position = -50; // 노트 시작 위치
 
         const interval = setInterval(() => {
-            if (position >= noteHeight) {
+            if (position >= window.innerHeight) {
                 clearInterval(interval);
                 note.style.display = 'none';
                 noteActive = false;
-                computerAttack(); // 플레이어가 실패했을 때 컴퓨터 공격
+                computerAttack(); // 플레이어가 노트를 맞추지 못했을 때 컴퓨터 공격
                 updateHP();
-                startGame(); // 다음 노트 시작
+                startTurn(); // 다음 턴 시작
             } else {
                 position += 5; // 노트가 내려가는 속도
                 note.style.top = position + 'px';
@@ -128,16 +129,26 @@
             updateHP();
             document.getElementById('note').style.display = 'none';
             noteActive = false;
-            startGame(); // 다음 노트 시작
+            startTurn(); // 다음 턴 시작
         }
     }
 
-    document.getElementById('restart').addEventListener('click', resetGame);
-    document.addEventListener('keydown', (event) => {
-        if (event.code === 'Space') {
-            hitNote();
+    function guard() {
+        if (noteActive) {
+            resultDisplay.innerHTML = "당신이 방어했습니다!";
+            document.getElementById('note').style.display = 'none';
+            noteActive = false;
+            startTurn(); // 다음 턴 시작
+        } else {
+            computerAttack(); // 노트가 없을 때 컴퓨터 공격
+            updateHP();
+            startTurn(); // 다음 턴 시작
         }
-    });
+    }
+
+    document.getElementById('punch').addEventListener('click', hitNote);
+    document.getElementById('guard').addEventListener('click', guard);
+    document.getElementById('restart').addEventListener('click', resetGame);
 
     // 게임 시작 시 배경 음악 재생
     window.onload = function() {
