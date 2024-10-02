@@ -43,7 +43,7 @@
 </div>
 <audio id="hit-sound" src="hit.mp3"></audio>
 <audio id="miss-sound" src="miss.mp3"></audio>
-<audio id="bg-music" src="background.mp3"></audio>
+<audio id="bg-music" src="background.mp3" loop autoplay></audio>
 
 <script>
     const notes = ['A', 'S', 'K', 'L'];
@@ -69,7 +69,6 @@
     }
 
     function startGame() {
-        document.getElementById('bg-music').play();
         noteInterval = setInterval(spawnNote, 1000);
     }
 
