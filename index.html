@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>리듬 턴제 격투기 게임</title>
+    <title>총게임</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,133 +25,69 @@
             margin-top: 20px;
             font-size: 20px;
         }
-        #note {
-            position: absolute;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 50px;
-            background-color: red;
-            display: none;
-        }
     </style>
 </head>
 <body>
 
-<h1>리듬 턴제 격투기 게임</h1>
-<button class="button" id="punch">펀치</button>
-<button class="button" id="guard">가드</button>
+<h1>총게임</h1>
+<button class="button" id="shoot">사격</button>
 <button class="button" id="restart" style="display: none;">다시하기</button>
 
 <div id="result"></div>
-<div id="hp">플레이어 HP: 3 | 컴퓨터 HP: 3</div>
-<div id="note"></div>
-
-<audio id="bg-music" src="background.mp3" loop></audio>
+<div id="hp">플레이어 HP: 3 | 적 HP: 3</div>
 
 <script>
     let playerHP = 3;
-    let computerHP = 3;
+    let enemyHP = 3;
     const resultDisplay = document.getElementById('result');
     const hpDisplay = document.getElementById('hp');
-    const bgMusic = document.getElementById('bg-music');
-    let noteActive = false;
-    let currentAction = null;
-
-    function computerAttack() {
-        const damage = Math.floor(Math.random() * 2) + 1; // 1 또는 2의 피해량
-        playerHP -= damage;
-        resultDisplay.innerHTML += `<br>컴퓨터가 공격하여 ${damage}의 피해를 줬습니다!`;
-    }
 
     function updateHP() {
-        hpDisplay.innerHTML = `플레이어 HP: ${playerHP} | 컴퓨터 HP: ${computerHP}`;
+        hpDisplay.innerHTML = `플레이어 HP: ${playerHP} | 적 HP: ${enemyHP}`;
         if (playerHP <= 0) {
-            resultDisplay.innerHTML += "<br>게임 오버! 컴퓨터가 이겼습니다!";
+            resultDisplay.innerHTML = "게임 오버! 적이 이겼습니다!";
             disableButtons();
-        } else if (computerHP <= 0) {
-            resultDisplay.innerHTML += "<br>축하합니다! 당신이 이겼습니다!";
+        } else if (enemyHP <= 0) {
+            resultDisplay.innerHTML = "축하합니다! 당신이 이겼습니다!";
             disableButtons();
         }
     }
 
     function disableButtons() {
-        noteActive = false;
-        document.getElementById('restart').style.display = 'block'; // 다시하기 버튼 표시
+        document.getElementById('shoot').disabled = true;
+        document.getElementById('restart').style.display = 'block';
     }
 
     function resetGame() {
         playerHP = 3;
-        computerHP = 3;
+        enemyHP = 3;
         resultDisplay.innerHTML = '';
-        hpDisplay.innerHTML = `플레이어 HP: ${playerHP} | 컴퓨터 HP: ${computerHP}`;
+        hpDisplay.innerHTML = `플레이어 HP: ${playerHP} | 적 HP: ${enemyHP}`;
         document.getElementById('restart').style.display = 'none'; // 다시하기 버튼 숨기기
-        bgMusic.currentTime = 0; // 음악을 처음으로 돌립니다.
-        bgMusic.play(); // 음악 재생
-        startTurn();
+        document.getElementById('shoot').disabled = false; // 버튼 활성화
     }
 
-    function startTurn(action) {
-        currentAction = action;
-        if (action === "punch") {
-            dropNote(); // 펀치를 선택했을 때 노트를 떨어뜨림
-        } else {
-            // 가드를 선택하면 노트는 떨어지지 않음
-            computerAttack(); // 가드 후 컴퓨터가 공격
-            updateHP();
-        }
-    }
-
-    function dropNote() {
-        const note = document.getElementById('note');
-        note.style.display = 'block';
-        note.style.top = '-50px';
-        let position = -50; // 노트 시작 위치
-
-        const interval = setInterval(() => {
-            if (position >= window.innerHeight) {
-                clearInterval(interval);
-                note.style.display = 'none';
-                noteActive = false;
-                computerAttack(); // 노트를 맞추지 못했을 때 컴퓨터 공격
-                updateHP();
-                startTurn(null); // 다음 턴 시작
-            } else {
-                position += 5; // 노트가 내려가는 속도
-                note.style.top = position + 'px';
-            }
-        }, 20);
-    }
-
-    function hitNote() {
-        if (noteActive) {
+    function shoot() {
+        const hitChance = Math.random();
+        if (hitChance < 0.7) { // 70% 확률로 적에게 대미지를 줌
             const damage = Math.floor(Math.random() * 2) + 1; // 1 또는 2의 피해량
-            computerHP -= damage;
-            resultDisplay.innerHTML = `당신이 공격하여 ${damage}의 피해를 줬습니다!`;
-            updateHP();
-            document.getElementById('note').style.display = 'none';
-            noteActive = false;
-            startTurn(null); // 다음 턴 시작
+            enemyHP -= damage;
+            resultDisplay.innerHTML = `당신이 적에게 ${damage}의 피해를 줬습니다!`;
+        } else {
+            resultDisplay.innerHTML = "타격 실패! 적을 놓쳤습니다.";
         }
+
+        if (enemyHP > 0) {
+            const enemyDamage = Math.floor(Math.random() * 2) + 1; // 적의 피해량
+            playerHP -= enemyDamage;
+            resultDisplay.innerHTML += `<br>적이 반격하여 ${enemyDamage}의 피해를 줬습니다!`;
+        }
+
+        updateHP();
     }
 
-    document.getElementById('punch').addEventListener('click', () => {
-        noteActive = true;
-        startTurn("punch");
-    });
-
-    document.getElementById('guard').addEventListener('click', () => {
-        startTurn("guard");
-    });
-
+    document.getElementById('shoot').addEventListener('click', shoot);
     document.getElementById('restart').addEventListener('click', resetGame);
-
-    // 게임 시작 시 배경 음악 재생
-    window.onload = function() {
-        bgMusic.play();
-        resetGame(); // 게임을 초기화하고 시작
-    };
 </script>
 
 </body>
